@@ -17,12 +17,14 @@ module cpu(
    wire [2:0]    rb;
    wire [2:0]    rc;
    wire signed [6:0]    signed_imm;
+   wire [9:0]           imm;
 
    assign opcode = ir[15:13];
    assign ra = ir[12:10];
    assign rb = ir[9:7];
    assign rc = ir[2:0];
    assign signed_imm = ir[6:0];
+   assign imm = ir[9:0];
    
    initial
      begin
@@ -49,7 +51,8 @@ module cpu(
         // $readmemh("instr.mem", instr);
 
         $readmemh("mem.mem", mem);
-        $readmemb("instr_loads_and_adds.mem", instr);
+        // $readmemb("instr_loads_and_adds.mem", instr);
+        $readmemh("testprog.mem", instr);
      end // initial begin
 
    initial
@@ -72,16 +75,42 @@ module cpu(
      end
 
    localparam ADD = 'b000;
+   localparam ADDI = 'b001;
+   localparam NAND = 'b010;
+   localparam LUI = 'b011;
+   // NOTE: the document that describes this CPU lists LW as both b100 and b101, we have opted to use b100
    localparam LW  = 'b100;
    
    always @ (posedge clk)
      begin
+        // NOTE: according to the document, r0 should always be 0;
         case (opcode)
           ADD:
             begin
                if (ra != 0)
                  begin
                     regs[ra] <= regs[rb] + regs[rc];
+                 end
+            end
+          ADDI:
+            begin
+               if (ra != 0)
+                 begin
+                    regs[ra] <= regs[rb] + signed_imm;
+                 end
+            end
+          NAND:
+            begin
+               if (ra != 0)
+                 begin
+                    regs[ra] <= ~(regs[rb] & regs[rc]);
+                 end
+            end
+          LUI:
+            begin
+               if (ra != 0)
+                 begin
+                    regs[ra] <= {imm, 6'b0};
                  end
             end
           LW:
