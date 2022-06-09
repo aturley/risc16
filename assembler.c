@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 			num = (NAND << OP_SHIFT) | (reg(arg0) << A_SHIFT) | (reg(arg1) << B_SHIFT) | reg(arg2);
 
 		} else if (!strcmp(opcode, "lui")) {
-			num = (LUI << OP_SHIFT) | (reg(arg0) << A_SHIFT) | ((raw(arg1) >> 6) & 0x3ff);
+			num = (LUI << OP_SHIFT) | (reg(arg0) << A_SHIFT) | ((raw(arg1)) & 0x3ff);
 
 		} else if (!strcmp(opcode, "lw")) {
 			num = (LW << OP_SHIFT) | (reg(arg0) << A_SHIFT) | (reg(arg1) << B_SHIFT) | imm(arg2);
