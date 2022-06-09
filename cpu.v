@@ -16,15 +16,19 @@ module cpu(
    wire [2:0]    ra;
    wire [2:0]    rb;
    wire [2:0]    rc;
-   wire signed [6:0]    signed_imm;
    wire [9:0]           imm;
+   wire [15:0]   ext_signed_imm;
+   /* verilator lint_off UNUSED */
+   wire [15:0]   memory_address;
+   /* verilator lint_on UNUSED */
 
    assign opcode = ir[15:13];
    assign ra = ir[12:10];
    assign rb = ir[9:7];
    assign rc = ir[2:0];
-   assign signed_imm = ir[6:0];
    assign imm = ir[9:0];
+   assign ext_signed_imm = {{9{ir[6]}}, ir[6:0]};
+   assign memory_address = regs[rb] + ext_signed_imm;
    
    initial
      begin
@@ -74,12 +78,15 @@ module cpu(
         ir <= instr[pc];
      end
 
+
+
    localparam ADD = 'b000;
    localparam ADDI = 'b001;
    localparam NAND = 'b010;
    localparam LUI = 'b011;
-   // NOTE: the document that describes this CPU lists LW as both b100 and b101, we have opted to use b100
-   localparam LW  = 'b100;
+   // NOTE: the document that describes this CPU lists LW as both b100 and b101, we have opted to use b101
+   // this is in accordance with the behavior of the much maligned assembler
+   localparam LW  = 'b101;
    
    always @ (posedge clk)
      begin
@@ -96,7 +103,7 @@ module cpu(
             begin
                if (ra != 0)
                  begin
-                    regs[ra] <= regs[rb] + signed_imm;
+                    regs[ra] <= regs[rb] + ext_signed_imm;
                  end
             end
           NAND:
@@ -117,9 +124,8 @@ module cpu(
             begin
                if (ra != 0)
                  begin
-                    // memory_address = regs[rb] + signed_imm
-                    // regs[ra] = mem[memory_address]
-                    regs[ra] <= mem[regs[rb] + signed_imm];
+                    $display("%5d - memory_addres %02x",$time, memory_address);
+                    regs[ra] <= mem[memory_address[7:0]];
                  end
             end
         endcase
