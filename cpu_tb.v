@@ -21,7 +21,7 @@ module cpu_tb();
 
    initial
      begin
-        #40
+        #100
           $finish;
      end
 endmodule

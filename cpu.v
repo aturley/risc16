@@ -1,6 +1,7 @@
-module cpu(
-           input clk
-           );
+module cpu
+(
+    input clk
+);
    reg [15:0]    mem [255:0]; // RAM: 256 elements of 16-bit memory
    reg [15:0]    instr [255:0]; // instructions: 256 elements of 16-bit memory
 
@@ -20,7 +21,9 @@ module cpu(
    wire [15:0]   ext_signed_imm;
    /* verilator lint_off UNUSED */
    wire [15:0]   memory_address;
+
    /* verilator lint_on UNUSED */
+
 
    assign opcode = ir[15:13];
    assign ra = ir[12:10];
@@ -59,6 +62,8 @@ module cpu(
         $readmemh("testprog.mem", instr);
      end // initial begin
 
+   localparam NUM_INSTRS_DISP = 16;
+
    initial
      begin
         $dumpvars(1, cpu);
@@ -66,11 +71,35 @@ module cpu(
           begin
              $dumpvars(1, regs[i]);
           end
+        for(i = 0; i < NUM_INSTRS_DISP; i = i + 1)
+          begin
+             $dumpvars(1, instr[i]);
+          end
      end
 
    always @ (posedge clk)
      begin
-        pc <= pc + 1;
+        case (opcode)
+          BEQ:
+            begin
+               if (regs[ra] == regs[rb])
+                 begin
+                    pc <= pc + 1 + ext_signed_imm[7:0];
+                 end
+               else
+                 begin
+                    pc <= pc + 1;
+                 end
+            end
+          JALR:
+            begin
+               pc <= regs[rb][7:0];
+            end
+          default:
+            begin
+             pc <= pc + 1;
+            end
+          endcase
      end
 
    always @ (posedge clk)
@@ -87,6 +116,10 @@ module cpu(
    // NOTE: the document that describes this CPU lists LW as both b100 and b101, we have opted to use b101
    // this is in accordance with the behavior of the much maligned assembler
    localparam LW  = 'b101;
+   localparam SW  = 'b100;
+   // NOTE: Our branch instructions implement a branch delay slot
+   localparam BEQ  = 'b110;
+   localparam JALR  = 'b111;
    
    always @ (posedge clk)
      begin
@@ -128,6 +161,17 @@ module cpu(
                     regs[ra] <= mem[memory_address[7:0]];
                  end
             end
+          JALR: begin
+             regs[ra] <= {8'h00, pc};
+            end
+          //BEQ: BEQ Doesn't modify registers
         endcase
      end
+
+   always @ (posedge clk) begin
+      if (opcode == SW)
+        begin
+            mem[memory_address[7:0]] <= regs[ra];
+        end
+    end
 endmodule
