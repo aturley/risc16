@@ -68,18 +68,34 @@ class CPU(object):
 
 
 @cocotb.test()
-async def program_test(dut):
+async def loop_test(dut):
     cpu = CPU(dut)
     await cpu.startup()
     await cpu.reset()
 
-    cpu.load_instructions_from_file("/Users/kale/recurse/risc16/testprog.mem")
-    for i in range(20):
+    cpu.load_instructions_from_file(
+        "/Users/kale/recurse/risc16/nested-loop/nested-loop.mem"
+    )
+    cpu.load_data_from_file("/Users/kale/recurse/risc16/nested-loop/nested-loop.mem")
+    for i in range(20000):
         await RisingEdge(cpu.clk)
 
-    expected_val = 1
-    if int(cpu.regs[5].value) == expected_val:
-        raise TestSuccess()
-    else:
-        print(int(cpu.regs[5].value))
-        raise TestFailure()
+    raise TestSuccess()
+
+
+# @cocotb.test()
+# async def program_test(dut):
+#    cpu = CPU(dut)
+#    await cpu.startup()
+#    await cpu.reset()
+#
+#    cpu.load_instructions_from_file("/Users/kale/recurse/risc16/testprog.mem")
+#    for i in range(20):
+#        await RisingEdge(cpu.clk)
+#
+#    expected_val = 1
+#    if int(cpu.regs[5].value) == expected_val:
+#        raise TestSuccess()
+#    else:
+#        print(int(cpu.regs[5].value))
+#        raise TestFailure()

@@ -88,7 +88,8 @@ module cpu
             begin
                if (regs[ra] == regs[rb])
                  begin
-                    pc <= pc_del + 1 + ext_signed_imm[7:0];
+                    //pc <= pc_del + 1 + ext_signed_imm[7:0];
+                    pc <= pc + ext_signed_imm[7:0];
                  end
                else
                  begin
@@ -169,7 +170,8 @@ module cpu
                  end
             end
           JALR: begin
-             regs[ra] <= {8'h00, pc_next};
+             //regs[ra] <= {8'h00, pc_next};
+             regs[ra] <= {8'h00, pc};
             end
           //BEQ: BEQ Doesn't modify registers
         endcase
