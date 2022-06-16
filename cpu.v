@@ -4,13 +4,9 @@ module cpu
 );
    reg [15:0]    mem [255:0]; // RAM: 256 elements of 16-bit memory
    reg [15:0]    instr [255:0]; // instructions: 256 elements of 16-bit memory
-
    reg [7:0]     pc;
-
    reg [15:0]    regs [7:0];
-
    reg [15:0]    ir;
-
    integer       i;
 
    wire [2:0]    opcode;
@@ -57,9 +53,9 @@ module cpu
         // $readmemh("mem.mem", mem);
         // $readmemh("instr.mem", instr);
 
-        $readmemh("mem.mem", mem);
+        //$readmemh("mem.mem", mem);
         // $readmemb("instr_loads_and_adds.mem", instr);
-        $readmemh("testprog.mem", instr);
+        //$readmemh("testprog.mem", instr);
      end // initial begin
 
    localparam NUM_INSTRS_DISP = 16;
@@ -157,7 +153,6 @@ module cpu
             begin
                if (ra != 0)
                  begin
-                    $display("%5d - memory_addres %02x",$time, memory_address);
                     regs[ra] <= mem[memory_address[7:0]];
                  end
             end
