@@ -75,6 +75,10 @@ module cpu
           begin
              $dumpvars(1, instr[i]);
           end
+        for(i = 2; i < 34; i = i + 1)
+          begin
+             $dumpvars(1, mem[i]);
+          end
      end
 
    always @ (posedge clk)
