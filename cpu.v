@@ -5,6 +5,7 @@ module cpu
    reg [15:0]    mem [255:0]; // RAM: 256 elements of 16-bit memory
    reg [15:0]    instr [255:0]; // instructions: 256 elements of 16-bit memory
    reg [7:0]     pc;
+   reg [7:0]     pc_del = 0;
    reg [15:0]    regs [7:0];
    reg [15:0]    ir;
    integer       i;
@@ -15,6 +16,9 @@ module cpu
    wire [2:0]    rc;
    wire [9:0]           imm;
    wire [15:0]   ext_signed_imm;
+   wire [7:0]    pc_next = pc + 1;
+
+
    /* verilator lint_off UNUSED */
    wire [15:0]   memory_address;
 
@@ -80,7 +84,7 @@ module cpu
             begin
                if (regs[ra] == regs[rb])
                  begin
-                    pc <= pc + 1 + ext_signed_imm[7:0];
+                    pc <= pc_del + 1 + ext_signed_imm[7:0];
                  end
                else
                  begin
@@ -103,6 +107,10 @@ module cpu
         ir <= instr[pc];
      end
 
+   always @ (posedge clk)
+     begin
+        pc_del <= pc;
+     end
 
 
    localparam ADD = 'b000;
@@ -157,7 +165,7 @@ module cpu
                  end
             end
           JALR: begin
-             regs[ra] <= {8'h00, pc};
+             regs[ra] <= {8'h00, pc_next};
             end
           //BEQ: BEQ Doesn't modify registers
         endcase

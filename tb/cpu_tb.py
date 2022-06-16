@@ -52,17 +52,34 @@ class CPU(object):
         for i in range(INSTRUCTION_MEMORY_DEPTH):
             self.instr[i].setimmediatevalue(0)
 
-        self.load_instructions_from_file("/Users/kale/recurse/risc16/testprog.mem")
-
         cocotb.fork(Clock(self.clk, 2, units="ns").start())
+        await RisingEdge(self.clk)
+        await RisingEdge(self.clk)
+        await RisingEdge(self.clk)
+
+    @cocotb.coroutine
+    async def reset(self):
+        self.dut.pc.setimmediatevalue(255)
         await RisingEdge(self.clk)
 
 
+# @cocotb.test()
+# async def test_add(dut):
+
+
 @cocotb.test()
-async def first_test(dut):
+async def program_test(dut):
     cpu = CPU(dut)
     await cpu.startup()
-    for i in range(10):
+    await cpu.reset()
+
+    cpu.load_instructions_from_file("/Users/kale/recurse/risc16/testprog.mem")
+    for i in range(20):
         await RisingEdge(cpu.clk)
 
-    raise TestSuccess()
+    expected_val = 1
+    if int(cpu.regs[5].value) == expected_val:
+        raise TestSuccess()
+    else:
+        print(int(cpu.regs[5].value))
+        raise TestFailure()
