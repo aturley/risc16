@@ -59,7 +59,7 @@ module cpu
 
         $readmemh("mem.mem", mem);
         // $readmemb("instr_loads_and_adds.mem", instr);
-        $readmemh("testprog.mem", instr);
+        $readmemh("mem.mem", instr);
      end // initial begin
 
    localparam NUM_INSTRS_DISP = 16;
@@ -75,6 +75,10 @@ module cpu
           begin
              $dumpvars(1, instr[i]);
           end
+        for(i = 2; i < 34; i = i + 1)
+          begin
+             $dumpvars(1, mem[i]);
+          end
      end
 
    always @ (posedge clk)
@@ -84,7 +88,7 @@ module cpu
             begin
                if (regs[ra] == regs[rb])
                  begin
-                    pc <= pc + 1 + ext_signed_imm[7:0];
+                    pc <= pc + ext_signed_imm[7:0];
                  end
                else
                  begin
