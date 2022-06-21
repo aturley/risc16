@@ -171,7 +171,10 @@ module cpu
             end
           JALR: begin
              //regs[ra] <= {8'h00, pc_next};
-             regs[ra] <= {8'h00, pc};
+             if (ra != 0)
+               begin
+                  regs[ra] <= {8'h00, pc};
+               end
             end
           //BEQ: BEQ Doesn't modify registers
         endcase
