@@ -4,14 +4,14 @@
 board:  .fill 1
         .fill 1
         .fill 0
-        .fill 0x0001
-        .fill 0x0003
-        .fill 0x0010
-        .fill 0x0010
-        .fill 0x0010
         .fill 0
         .fill 0
+        .fill 0x0200
+        .fill 0x0100
         .fill 0x0700
+        .fill 0
+        .fill 0
+        .fill 0
         .fill 0
         .fill 0
         .fill 0
@@ -42,8 +42,8 @@ wb:     .fill 0
         # sp - 2 -> y
 start:  movi r7, stack          # set r7 to beginning of stack
         addi r7, r7, 2          # sp + 2, because we have 2 local variables (x and y)
-        add r5, r0, r0          # r5 = 0
 
+life:   add r5, r0, r0          # r5 = 0
         add r1, r0, r0          # r1 will hold x for now, which is 0
         sw r1, r7, -1           # store x to sp - 1
 loop1:  addi r2, r0, 16         # load x_limit (16) in to r2
@@ -131,15 +131,17 @@ copylx: add r0, r0, r0
 
         # END COPY BUFF
 
-        # BEGIN SET WB = 1
+        # BEGIN STROBE WB
         
         movi r1, wb             # load address of wb into r1
         addi r2, r0, 1          # r2 <- 1
         sw r2, r1, 0            # mem[r1] <- r2
+        sw r0, r1, 0            # mem[r1] <- 0
 
-        # END SET WB = 1
+        # END STROBE WB
         
-halt:   beq r0, r0, halt        # endless loop
+        movi r6, life
+        jalr r6, r6
         add r0, r0, r0          # nop
 
         # r1 -> x
@@ -269,7 +271,7 @@ nbrppx: add r6, r0, r5       # r6 <- population total
         jalr r0, r5          # return
         add r0, r0, r0       # nop
         
-stack:  .space 18
+stack:  .space 16
 
 mask:   .fill 0x0001
         .fill 0x0002
