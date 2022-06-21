@@ -74,13 +74,37 @@ async def loop_test(dut):
     await cpu.reset()
 
     cpu.load_instructions_from_file(
-        "/Users/kale/recurse/risc16/nested-loop/nested-loop.mem"
+        "../nested-loop/nested-loop.mem"
     )
-    cpu.load_data_from_file("/Users/kale/recurse/risc16/nested-loop/nested-loop.mem")
-    for i in range(20000):
-        await RisingEdge(cpu.clk)
+    cpu.load_data_from_file("../nested-loop/nested-loop.mem")
 
-    raise TestSuccess()
+    old_r5 = -1
+    
+    # for i in range(140000):
+    while(True):
+        await RisingEdge(cpu.clk)
+        wb = int(cpu.mem[34].value)
+        if wb == 1:
+            for i in range(0, 16):
+                print(f"board : mem[{(i+2):#0{4}x}] == " + (f"{int(cpu.mem[i + 2].value):#0{18}b}").replace('0', '_').replace('1', 'X'))
+            print("---")
+
+
+    print(f"pc == {int(cpu.pc.value)}")
+    print(f"wb == {int(cpu.mem[34].value)}")
+
+    for i in range(0, 16):
+        print(f"board : mem[{(i+2):#0{4}x}] == {int(cpu.mem[i + 2].value):#0{18}b}")
+
+    print("")
+
+    for i in range(0, 16):
+        print(f"buffer : mem[{(i+18):#0{4}x}] == {int(cpu.mem[i + 18].value):#0{18}b}")
+
+    if r5 == 8:
+        raise TestSuccess()
+    else:
+        raise TestFailure()
 
 
 # @cocotb.test()
